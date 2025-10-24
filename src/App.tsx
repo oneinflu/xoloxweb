@@ -26,6 +26,7 @@ import RolesPermissions from "./pages/Users/RolesPermissions";
 import SessionsAndDevices from "./pages/Users/SessionsAndDevices";
 import AllLeads from "./pages/CRM/AllLeads";
 import WorkflowBuilder from "./pages/automation/builder/WorkflowBuilder";
+import Reports from "./pages/insights/reports";
 
 
 
@@ -50,7 +51,7 @@ export default function App() {
             <Route path="/profile" element={<UserProfiles />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/blank" element={<Blank />} />
-
+<Route path="insights/reports" element={<Reports />} />
             {/* Forms */}
             <Route path="/forms">
               <Route path="elements" element={<FormElements />} />
