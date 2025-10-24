@@ -31,6 +31,8 @@ import EmailTemplates from "./pages/communications/email";
 import SMSTemplates from "./pages/communications/sms";
 import WhatsAppTemplates from "./pages/communications/whatsapp";
 
+import IntegrationsPage from "./pages/integrations/main";
+
 
 
 
@@ -52,6 +54,9 @@ export default function App() {
                 <Route path="/communications/email" element={<EmailTemplates />} />
                 <Route path="/communications/sms" element={<SMSTemplates />} />
             <Route path="/communications/whatsapp" element={<WhatsAppTemplates />} />
+
+            <Route path="/integrations/api-keys" element={<IntegrationsPage />} />
+           
               
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
