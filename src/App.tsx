@@ -27,6 +27,7 @@ import SessionsAndDevices from "./pages/Users/SessionsAndDevices";
 import AllLeads from "./pages/CRM/AllLeads";
 import WorkflowBuilder from "./pages/automation/builder/WorkflowBuilder";
 import Reports from "./pages/insights/reports";
+import EmailTemplates from "./pages/communications/email";
 
 
 
@@ -46,6 +47,7 @@ export default function App() {
                 <Route path="/users/sessions" element={<SessionsAndDevices />} />
                 <Route path="/crm/leads" element={<AllLeads />} />
                 <Route path="automation/builder" element={<WorkflowBuilder />} />
+                <Route path="/communications/email" element={<EmailTemplates />} />
               
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
