@@ -28,6 +28,8 @@ import AllLeads from "./pages/CRM/AllLeads";
 import WorkflowBuilder from "./pages/automation/builder/WorkflowBuilder";
 import Reports from "./pages/insights/reports";
 import EmailTemplates from "./pages/communications/email";
+import SMSTemplates from "./pages/communications/sms";
+import WhatsAppTemplates from "./pages/communications/whatsapp";
 
 
 
@@ -48,6 +50,8 @@ export default function App() {
                 <Route path="/crm/leads" element={<AllLeads />} />
                 <Route path="automation/builder" element={<WorkflowBuilder />} />
                 <Route path="/communications/email" element={<EmailTemplates />} />
+                <Route path="/communications/sms" element={<SMSTemplates />} />
+            <Route path="/communications/whatsapp" element={<WhatsAppTemplates />} />
               
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />

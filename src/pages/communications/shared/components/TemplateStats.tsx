@@ -17,7 +17,7 @@ interface StatCard {
 export default function TemplateStats({ templates }: TemplateStatsProps) {
   // Calculate statistics
   const totalTemplates = templates.length;
-  const activeTemplates = templates.filter(t => t.status === 'active').length;
+  const activeTemplates = templates.filter(t => t.status === 'published').length;
   const draftTemplates = templates.filter(t => t.status === 'draft').length;
   const usedInWorkflows = templates.filter(t => t.usage > 0).length;
   const aiGeneratedTemplates = templates.filter(t => 
