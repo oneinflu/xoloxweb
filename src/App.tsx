@@ -25,6 +25,7 @@ import InviteUser from "./pages/Users/InviteUser";
 import RolesPermissions from "./pages/Users/RolesPermissions";
 import SessionsAndDevices from "./pages/Users/SessionsAndDevices";
 import AllLeads from "./pages/CRM/AllLeads";
+import PipelinePage from "./pages/CRM/pipeline";
 import WorkflowBuilder from "./pages/automation/builder/WorkflowBuilder";
 import Reports from "./pages/insights/reports";
 import EmailTemplates from "./pages/communications/email";
@@ -32,6 +33,7 @@ import SMSTemplates from "./pages/communications/sms";
 import WhatsAppTemplates from "./pages/communications/whatsapp";
 
 import IntegrationsPage from "./pages/integrations/main";
+import OrganizationsPage from "./pages/organizations";
 
 
 
@@ -50,12 +52,14 @@ export default function App() {
               <Route path="/users/invite" element={<InviteUser />} />
                 <Route path="/users/sessions" element={<SessionsAndDevices />} />
                 <Route path="/crm/leads" element={<AllLeads />} />
+                <Route path="/crm/pipeline" element={<PipelinePage />} />
                 <Route path="automation/builder" element={<WorkflowBuilder />} />
                 <Route path="/communications/email" element={<EmailTemplates />} />
                 <Route path="/communications/sms" element={<SMSTemplates />} />
             <Route path="/communications/whatsapp" element={<WhatsAppTemplates />} />
 
             <Route path="/integrations/api-keys" element={<IntegrationsPage />} />
+            <Route path="/organizations" element={<OrganizationsPage />} />
            
               
             {/* Others Page */}
@@ -96,3 +100,6 @@ export default function App() {
     </>
   );
 }
+           
+              
+         

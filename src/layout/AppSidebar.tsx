@@ -62,14 +62,14 @@ const accessItems: NavItem[] = [
       { name: "Sessions & Devices", path: "/users/sessions", pro: false },
     ],
   },
-  {
-    icon: <BoxCubeIcon />,
+   {
+    icon:<BoxCubeIcon />,
     name: "Organizations",
-    subItems: [
-      { name: "Organizations", path: "/organizations", pro: false },
-      { name: "Pending Requests", path: "/organizations/pending", pro: false },
-    ],
+    path: "/organizations",
+    
+    
   },
+ 
 ];
 
 // CRM Section
@@ -79,7 +79,7 @@ const crmItems: NavItem[] = [
     name: "Leads & CRM",
     subItems: [
       { name: "All Leads", path: "/crm/leads", pro: false },
-      { name: "View Lead", path: "/crm/leads/view", pro: false },
+    
       { name: "Pipeline Board", path: "/crm/pipeline", pro: false },
       { name: "Import / Export", path: "/crm/import-export", pro: false },
     ],
