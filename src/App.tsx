@@ -26,6 +26,7 @@ import RolesPermissions from "./pages/Users/RolesPermissions";
 import SessionsAndDevices from "./pages/Users/SessionsAndDevices";
 import AllLeads from "./pages/CRM/AllLeads";
 import PipelinePage from "./pages/CRM/pipeline";
+import ImportExportPage from "./pages/CRM/import-export";
 import WorkflowBuilder from "./pages/automation/builder/WorkflowBuilder";
 import Reports from "./pages/insights/reports";
 import EmailTemplates from "./pages/communications/email";
@@ -53,6 +54,7 @@ export default function App() {
                 <Route path="/users/sessions" element={<SessionsAndDevices />} />
                 <Route path="/crm/leads" element={<AllLeads />} />
                 <Route path="/crm/pipeline" element={<PipelinePage />} />
+                <Route path="/crm/import-export" element={<ImportExportPage />} />
                 <Route path="automation/builder" element={<WorkflowBuilder />} />
                 <Route path="/communications/email" element={<EmailTemplates />} />
                 <Route path="/communications/sms" element={<SMSTemplates />} />

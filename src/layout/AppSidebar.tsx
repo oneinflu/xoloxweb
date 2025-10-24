@@ -5,29 +5,20 @@ import { Link, useLocation } from "react-router-dom";
 // Assume these icons are imported from an icon library
 import {
   BoxCubeIcon,
- 
   ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
   ListIcon,
- 
   PieChartIcon,
   PlugInIcon,
- 
   UserCircleIcon,
   GroupIcon,
-  LockIcon,
-  
   TaskIcon,
   BoltIcon,
   MailIcon,
   DollarLineIcon,
-  DocsIcon,
   ShootingStarIcon,
-  
   InfoIcon,
-  
-  FileIcon,
  
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
@@ -179,43 +170,11 @@ const insightsItems: NavItem[] = [
   },
 ];
 
-// Content Section
-const contentItems: NavItem[] = [
-  {
-    icon: <DocsIcon />,
-    name: "Templates & Content",
-    subItems: [
-      { name: "Documents", path: "/content/documents", pro: false },
-      { name: "Snippet Manager", path: "/content/snippets", pro: false },
-    ],
-  },
-];
 
-// Developer Section
-const developerItems: NavItem[] = [
-  {
-    icon: <FileIcon />,
-    name: "Developer / APIs",
-    subItems: [
-      { name: "API Docs", path: "/developer/docs", pro: false },
-      { name: "SDKs", path: "/developer/sdks", pro: false },
-      { name: "Test Console", path: "/developer/console", pro: false },
-      { name: "Webhook Tester", path: "/developer/webhook-tester", pro: false },
-    ],
-  },
-];
+
+
 
 // Security Section
-const securityItems: NavItem[] = [
-  {
-    icon: <LockIcon />,
-    name: "Security",
-    subItems: [
-      { name: "Audit & Logs", path: "/security/audit", pro: false },
-      { name: "Security Events", path: "/security/events", pro: false },
-    ],
-  },
-];
 
 // System Section
 const systemItems: NavItem[] = [
@@ -273,9 +232,7 @@ const AppSidebar: React.FC = () => {
       { items: financeItems, type: "finance" },
       { items: integrationsItems, type: "integrations" },
       { items: insightsItems, type: "insights" },
-      { items: contentItems, type: "content" },
-      { items: developerItems, type: "developer" },
-      { items: securityItems, type: "security" },
+     
       { items: systemItems, type: "system" },
       { items: supportItems, type: "support" },
     ];
@@ -644,59 +601,12 @@ const AppSidebar: React.FC = () => {
               {renderMenuItems(insightsItems, "insights")}
             </div>
 
-            {/* Content Section */}
-            <div>
-              <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                  !isExpanded && !isHovered
-                    ? "lg:justify-center"
-                    : "justify-start"
-                }`}
-              >
-                {isExpanded || isHovered || isMobileOpen ? (
-                  "Content"
-                ) : (
-                  <HorizontaLDots className="size-6" />
-                )}
-              </h2>
-              {renderMenuItems(contentItems, "content")}
-            </div>
+        
 
             {/* Developer Section */}
-            <div>
-              <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                  !isExpanded && !isHovered
-                    ? "lg:justify-center"
-                    : "justify-start"
-                }`}
-              >
-                {isExpanded || isHovered || isMobileOpen ? (
-                  "Developer"
-                ) : (
-                  <HorizontaLDots className="size-6" />
-                )}
-              </h2>
-              {renderMenuItems(developerItems, "developer")}
-            </div>
+         
 
-            {/* Security Section */}
-            <div>
-              <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                  !isExpanded && !isHovered
-                    ? "lg:justify-center"
-                    : "justify-start"
-                }`}
-              >
-                {isExpanded || isHovered || isMobileOpen ? (
-                  "Security"
-                ) : (
-                  <HorizontaLDots className="size-6" />
-                )}
-              </h2>
-              {renderMenuItems(securityItems, "security")}
-            </div>
+           
 
             {/* System Section */}
             <div>
