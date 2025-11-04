@@ -4,10 +4,55 @@ import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
+import { useNavigate } from "react-router-dom";
+
+const PasswordStrengthIndicator = ({ password }: { password: string }) => {
+  const getStrength = () => {
+    if (password.length < 6) {
+      return { label: 'Weak', color: 'bg-red-500', width: 'w-1/3' };
+    } else if (password.length < 10) {
+      return { label: 'Medium', color: 'bg-yellow-500', width: 'w-2/3' };
+    } else {
+      return { label: 'Strong', color: 'bg-green-500', width: 'w-full' };
+    }
+  };
+
+  const { label, color, width } = getStrength();
+
+  return (
+    <div>
+      <div className="h-2 bg-gray-200 rounded">
+        <div className={`h-2 rounded ${color} ${width}`}></div>
+      </div>
+      <p className="text-xs text-gray-500">{label}</p>
+    </div>
+  );
+};
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordsMatch, setPasswordsMatch] = useState(true);
   const [isChecked, setIsChecked] = useState(false);
+  const navigate = useNavigate();
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    setPasswordsMatch(e.target.value === confirmPassword);
+  };
+
+  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setConfirmPassword(e.target.value);
+    setPasswordsMatch(password === e.target.value);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    navigate('/onboarding');
+  };
+
   return (
     <div className="flex flex-col flex-1 w-full overflow-y-auto lg:w-1/2 no-scrollbar">
       <div className="w-full max-w-md mx-auto mb-5 sm:pt-10">
@@ -82,31 +127,19 @@ export default function SignUpForm() {
                 </span>
               </div>
             </div>
-            <form>
+            <form onSubmit={handleSubmit}>
               <div className="space-y-5">
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                  {/* <!-- First Name --> */}
-                  <div className="sm:col-span-1">
+                  {/* <!-- Contact Person Name --> */}
+                  <div className="sm:col-span-2">
                     <Label>
-                      First Name<span className="text-error-500">*</span>
+                      Contact Person Name<span className="text-error-500">*</span>
                     </Label>
                     <Input
                       type="text"
-                      id="fname"
-                      name="fname"
-                      placeholder="Enter your first name"
-                    />
-                  </div>
-                  {/* <!-- Last Name --> */}
-                  <div className="sm:col-span-1">
-                    <Label>
-                      Last Name<span className="text-error-500">*</span>
-                    </Label>
-                    <Input
-                      type="text"
-                      id="lname"
-                      name="lname"
-                      placeholder="Enter your last name"
+                      id="contactName"
+                      name="contactName"
+                      placeholder="Enter contact person's name"
                     />
                   </div>
                 </div>
@@ -122,6 +155,18 @@ export default function SignUpForm() {
                     placeholder="Enter your email"
                   />
                 </div>
+                {/* <!-- Phone Number --> */}
+                <div>
+                  <Label>
+                    Phone Number<span className="text-error-500">*</span>
+                  </Label>
+                  <Input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    placeholder="Enter your phone number"
+                  />
+                </div>
                 {/* <!-- Password --> */}
                 <div>
                   <Label>
@@ -131,6 +176,8 @@ export default function SignUpForm() {
                     <Input
                       placeholder="Enter your password"
                       type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={handlePasswordChange}
                     />
                     <span
                       onClick={() => setShowPassword(!showPassword)}
@@ -143,6 +190,34 @@ export default function SignUpForm() {
                       )}
                     </span>
                   </div>
+                  <PasswordStrengthIndicator password={password} />
+                </div>
+                {/* <!-- Confirm Password --> */}
+                <div>
+                  <Label>
+                    Confirm Password<span className="text-error-500">*</span>
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      placeholder="Confirm your password"
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={handleConfirmPasswordChange}
+                    />
+                    <span
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
+                    >
+                      {showConfirmPassword ? (
+                        <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
+                      ) : (
+                        <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
+                      )}
+                    </span>
+                  </div>
+                  {!passwordsMatch && (
+                    <p className="text-xs text-red-500">Passwords do not match.</p>
+                  )}
                 </div>
                 {/* <!-- Checkbox --> */}
                 <div className="flex items-center gap-3">
