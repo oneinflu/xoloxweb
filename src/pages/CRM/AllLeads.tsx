@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { useState } from 'react';
 import {
   Search,
@@ -39,7 +39,10 @@ import {
   Paperclip,
   Circle,
   RefreshCw,
-  CreditCard
+  CreditCard,
+  Maximize2,
+  Minimize2,
+  GripVertical
 } from 'lucide-react';
 
 // Types
@@ -261,6 +264,52 @@ const AllLeads = () => {
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
   const [activeDetailTab, setActiveDetailTab] = useState<'overview' | 'timeline' | 'tasks' | 'files' | 'ai-insights' | 'automation'>('overview');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Column management
+  type ColumnKey = 'lead' | 'contact' | 'source' | 'status' | 'owner' | 'score' | 'created' | 'lastActivity' | 'actions';
+  interface Column { key: ColumnKey; label: string; visible: boolean; }
+  const initialColumns: Column[] = [
+    { key: 'lead', label: 'Lead', visible: true },
+    { key: 'contact', label: 'Contact', visible: true },
+    { key: 'source', label: 'Source', visible: true },
+    { key: 'status', label: 'Status', visible: true },
+    { key: 'owner', label: 'Owner', visible: true },
+    { key: 'score', label: 'Score', visible: true },
+    { key: 'created', label: 'Created', visible: true },
+    { key: 'lastActivity', label: 'Last Activity', visible: true },
+    { key: 'actions', label: 'Actions', visible: true }
+  ];
+  const [columns, setColumns] = useState<Column[]>(initialColumns);
+  const [dragKey, setDragKey] = useState<ColumnKey | null>(null);
+  const [dragOverKey, setDragOverKey] = useState<ColumnKey | null>(null);
+  const [showColumnManager, setShowColumnManager] = useState(false);
+
+  const onDragStart = (key: ColumnKey) => {
+    setDragKey(key);
+  };
+  const onDrop = (targetKey: ColumnKey) => {
+    if (!dragKey || dragKey === targetKey) {
+      setDragOverKey(null);
+      return;
+    }
+    const next = [...columns];
+    const from = next.findIndex(c => c.key === dragKey);
+    const to = next.findIndex(c => c.key === targetKey);
+    if (from === -1 || to === -1) {
+      setDragKey(null);
+      setDragOverKey(null);
+      return;
+    }
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    setColumns(next);
+    setDragKey(null);
+    setDragOverKey(null);
+  };
+  const toggleColumnVisibility = (key: ColumnKey) => {
+    setColumns(cols => cols.map(c => c.key === key ? { ...c, visible: !c.visible } : c));
+  };
   
  
   // Mock data for leads
@@ -428,6 +477,19 @@ const AllLeads = () => {
     conversionRate: 14.8
   };
 
+  // Derived filtered leads based on search and status toggles
+  const statuses = ['New','Contacted','Qualified','Proposal','Converted','Lost'];
+  const [activeStatusFilters, setActiveStatusFilters] = useState<string[]>([]);
+  const toggleStatusFilter = (status: string) => {
+    setActiveStatusFilters(prev => prev.includes(status) ? prev.filter(s => s !== status) : [...prev, status]);
+  };
+  const filteredLeads = mockLeads.filter(lead => {
+    const q = searchQuery.trim().toLowerCase();
+    const matchesSearch = q === '' || [lead.name, lead.email, lead.phone, lead.id].some(v => v.toLowerCase().includes(q));
+    const matchesStatus = activeStatusFilters.length === 0 || activeStatusFilters.includes(lead.status);
+    return matchesSearch && matchesStatus;
+  });
+
   const aiInsights: AIInsights = {
     hotLeads: 52,
     warmLeads: 213,
@@ -508,7 +570,37 @@ const AllLeads = () => {
                 <Zap className="w-4 h-4 mr-2" />
                 Find Hot Leads
               </button>
+              <button
+                className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                onClick={() => setShowColumnManager(!showColumnManager)}
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Columns
+              </button>
+              <button
+                className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                onClick={() => setIsFullscreen(true)}
+              >
+                <Maximize2 className="w-4 h-4 mr-2" />
+                Full Screen
+              </button>
             </div>
+          </div>
+
+          {/* Status Toggles */}
+          <div className="flex flex-wrap gap-2 mb-3">
+            {statuses.map((s) => {
+              const active = activeStatusFilters.includes(s);
+              return (
+                <button
+                  key={s}
+                  onClick={() => toggleStatusFilter(s)}
+                  className={`px-3 py-1 rounded-full text-sm border ${active ? 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700' : 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-700/30 dark:text-gray-300 dark:border-gray-600'}`}
+                >
+                  {s}
+                </button>
+              );
+            })}
           </div>
 
           {/* Active Filters */}
@@ -523,6 +615,26 @@ const AllLeads = () => {
                   <button className="ml-2 text-gray-500 hover:text-gray-700">×</button>
                 </span>
               ))}
+            </div>
+          )}
+
+          {/* Column Manager Panel */}
+          {showColumnManager && (
+            <div className="mt-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700/30">
+              <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Show/Hide Columns</div>
+              <div className="flex flex-wrap gap-3">
+                {columns.map((col) => (
+                  <label key={col.key} className="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                    <input
+                      type="checkbox"
+                      checked={col.visible}
+                      onChange={() => toggleColumnVisibility(col.key)}
+                      className="rounded border-gray-300 dark:border-gray-600"
+                    />
+                    {col.label}
+                  </label>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -592,7 +704,14 @@ const AllLeads = () => {
       </div>
 
       {/* ROW 4 - Leads Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+      <div className={isFullscreen ? "fixed inset-0 z-[999998] p-4 bg-white dark:bg-gray-900 overflow-auto" : "bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden"}>
+        {isFullscreen && (
+          <div className="flex items-center justify-end mb-3">
+            <button onClick={() => setIsFullscreen(false)} className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+              <Minimize2 className="w-4 h-4 mr-2" /> Exit Full Screen
+            </button>
+          </div>
+        )}
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-700">
@@ -600,37 +719,28 @@ const AllLeads = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider sticky left-0 bg-gray-50 dark:bg-gray-700">
                   <input type="checkbox" className="rounded border-gray-300 dark:border-gray-600" />
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Lead
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Contact
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Source
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Owner
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Score
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Created
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Last Activity
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Actions
-                </th>
+                {columns.filter(c => c.visible).map((col) => (
+                  <th
+                    key={col.key}
+                    draggable
+                    onDragStart={() => onDragStart(col.key)}
+                    onDragOver={(e) => { e.preventDefault(); setDragOverKey(col.key); }}
+                    onDragEnter={() => setDragOverKey(col.key)}
+                    onDragEnd={() => { setDragKey(null); setDragOverKey(null); }}
+                    onDrop={() => onDrop(col.key)}
+                    className={`px-6 py-3 ${col.key === 'actions' ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-move ${dragOverKey === col.key ? 'border-l-2 border-blue-500 ring-1 ring-blue-400 ring-inset' : ''} ${dragKey === col.key ? 'opacity-60' : ''}`}
+                    aria-label={`Drag to reorder ${col.label} column`}
+                  >
+                    <div className={`flex items-center ${col.key === 'actions' ? 'justify-end' : 'justify-start'} gap-2`}>
+                      <span>{col.label}</span>
+                      <GripVertical className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
+                    </div>
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {mockLeads.map((lead) => (
+              {filteredLeads.map((lead) => (
                   <tr
                       key={lead.id}
                       className="hover:bg-gray-50 dark:hover:bg-gray-700/30 group cursor-pointer"
@@ -657,112 +767,131 @@ const AllLeads = () => {
                       }}
                     />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      
-                      <div className="ml-0">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {lead.name}
-                        </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          ID: {lead.id}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-white group-hover:hidden">
-                      {lead.email}
-                    </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400 group-hover:hidden">
-                      {lead.phone}
-                    </div>
-                    <div className="hidden group-hover:flex space-x-2">
-                      <button
-                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded"
-                        title="Copy Email"
-                      >
-                        <Copy className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                      </button>
-                      <button
-                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded"
-                        title="Send Email"
-                      >
-                        <Mail className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                      </button>
-                      <button
-                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded"
-                        title="Call"
-                      >
-                        <Phone className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                      </button>
-                      <button
-                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded"
-                        title="Send Message"
-                      >
-                        <MessageSquare className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                      </button>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                      ${lead.source === 'Website' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
-                      lead.source === 'Ads' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' :
-                      'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>
-                      {lead.source}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <select
-                      value={lead.status}
-                      onChange={() => {/* Handle status change */}}
-                      className="text-sm border-0 bg-transparent focus:ring-0 cursor-pointer
-                        ${lead.status === 'New' ? 'text-blue-600 dark:text-blue-400' :
-                        lead.status === 'Contacted' ? 'text-yellow-600 dark:text-yellow-400' :
-                        lead.status === 'Qualified' ? 'text-green-600 dark:text-green-400' :
-                        lead.status === 'Proposal' ? 'text-purple-600 dark:text-purple-400' :
-                        lead.status === 'Converted' ? 'text-emerald-600 dark:text-emerald-400' :
-                        'text-red-600 dark:text-red-400'}"
-                    >
-                      <option value="New">New</option>
-                      <option value="Contacted">Contacted</option>
-                      <option value="Qualified">Qualified</option>
-                      <option value="Proposal">Proposal</option>
-                      <option value="Converted">Converted</option>
-                      <option value="Lost">Lost</option>
-                    </select>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                     
-                      <div className="ml-0 text-sm text-gray-900 dark:text-white">
-                        {lead.owner.name}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                      ${lead.aiScore >= 90 ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' :
-                      lead.aiScore >= 70 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' :
-                      'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'}`}>
-                      {lead.aiScore}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-white">
-                      {new Date(lead.createdAt).toLocaleDateString()}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                      {lead.lastActivity.time} - {lead.lastActivity.action}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right">
-                    <button className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                      <MoreVertical className="w-5 h-5" />
-                    </button>
-                  </td>
+                  {columns.filter(c => c.visible).map((col) => {
+                    switch (col.key) {
+                      case 'lead':
+                        return (
+                          <td key={col.key} className={`px-6 py-4 whitespace-nowrap ${dragOverKey === col.key ? 'border-l-2 border-blue-500 ring-1 ring-blue-400 ring-inset' : ''} ${dragKey === col.key ? 'opacity-60' : ''}`}>
+                            <div className="flex items-center">
+                              <div className="ml-0">
+                                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                  {lead.name}
+                                </div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                  ID: {lead.id}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        );
+                      case 'contact':
+                        return (
+                          <td key={col.key} className={`px-6 py-4 whitespace-nowrap ${dragOverKey === col.key ? 'border-l-2 border-blue-500 ring-1 ring-blue-400 ring-inset' : ''} ${dragKey === col.key ? 'opacity-60' : ''}`}>
+                            <div className="text-sm text-gray-900 dark:text-white group-hover:hidden">
+                              {lead.email}
+                            </div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400 group-hover:hidden">
+                              {lead.phone}
+                            </div>
+                            <div className="hidden group-hover:flex space-x-2">
+                              <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded" title="Copy Email">
+                                <Copy className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                              </button>
+                              <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded" title="Send Email">
+                                <Mail className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                              </button>
+                              <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded" title="Call">
+                                <Phone className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                              </button>
+                              <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded" title="Send Message">
+                                <MessageSquare className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                              </button>
+                            </div>
+                          </td>
+                        );
+                      case 'source':
+                        return (
+                          <td key={col.key} className={`px-6 py-4 whitespace-nowrap ${dragOverKey === col.key ? 'border-l-2 border-blue-500 ring-1 ring-blue-400 ring-inset' : ''} ${dragKey === col.key ? 'opacity-60' : ''}`}>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                              ${lead.source === 'Website' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
+                              lead.source === 'Ads' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' :
+                              'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>
+                              {lead.source}
+                            </span>
+                          </td>
+                        );
+                      case 'status':
+                        return (
+                          <td key={col.key} className={`px-6 py-4 whitespace-nowrap ${dragOverKey === col.key ? 'border-l-2 border-blue-500 ring-1 ring-blue-400 ring-inset' : ''} ${dragKey === col.key ? 'opacity-60' : ''}`}>
+                            <select
+                              value={lead.status}
+                              onChange={() => {/* Handle status change */}}
+                              className="text-sm border-0 bg-transparent focus:ring-0 cursor-pointer
+                                ${lead.status === 'New' ? 'text-blue-600 dark:text-blue-400' :
+                                lead.status === 'Contacted' ? 'text-yellow-600 dark:text-yellow-400' :
+                                lead.status === 'Qualified' ? 'text-green-600 dark:text-green-400' :
+                                lead.status === 'Proposal' ? 'text-purple-600 dark:text-purple-400' :
+                                lead.status === 'Converted' ? 'text-emerald-600 dark:text-emerald-400' :
+                                'text-red-600 dark:text-red-400'}"
+                            >
+                              <option value="New">New</option>
+                              <option value="Contacted">Contacted</option>
+                              <option value="Qualified">Qualified</option>
+                              <option value="Proposal">Proposal</option>
+                              <option value="Converted">Converted</option>
+                              <option value="Lost">Lost</option>
+                            </select>
+                          </td>
+                        );
+                      case 'owner':
+                        return (
+                          <td key={col.key} className={`px-6 py-4 whitespace-nowrap ${dragOverKey === col.key ? 'border-l-2 border-blue-500 ring-1 ring-blue-400 ring-inset' : ''} ${dragKey === col.key ? 'opacity-60' : ''}`}>
+                            <div className="flex items-center">
+                              <div className="ml-0 text-sm text-gray-900 dark:text-white">
+                                {lead.owner.name}
+                              </div>
+                            </div>
+                          </td>
+                        );
+                      case 'score':
+                        return (
+                          <td key={col.key} className={`px-6 py-4 whitespace-nowrap ${dragOverKey === col.key ? 'border-l-2 border-blue-500 ring-1 ring-blue-400 ring-inset' : ''} ${dragKey === col.key ? 'opacity-60' : ''}`}>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                              ${lead.aiScore >= 90 ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' :
+                              lead.aiScore >= 70 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' :
+                              'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'}`}>
+                              {lead.aiScore}
+                            </span>
+                          </td>
+                        );
+                      case 'created':
+                        return (
+                          <td key={col.key} className={`px-6 py-4 whitespace-nowrap ${dragOverKey === col.key ? 'border-l-2 border-blue-500 ring-1 ring-blue-400 ring-inset' : ''} ${dragKey === col.key ? 'opacity-60' : ''}`}>
+                            <div className="text-sm text-gray-900 dark:text-white">
+                              {new Date(lead.createdAt).toLocaleDateString()}
+                            </div>
+                          </td>
+                        );
+                      case 'lastActivity':
+                        return (
+                          <td key={col.key} className={`px-6 py-4 whitespace-nowrap ${dragOverKey === col.key ? 'border-l-2 border-blue-500 ring-1 ring-blue-400 ring-inset' : ''} ${dragKey === col.key ? 'opacity-60' : ''}`}>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              {lead.lastActivity.time} - {lead.lastActivity.action}
+                            </div>
+                          </td>
+                        );
+                      case 'actions':
+                        return (
+                          <td key={col.key} className={`px-6 py-4 whitespace-nowrap text-right ${dragOverKey === col.key ? 'border-l-2 border-blue-500 ring-1 ring-blue-400 ring-inset' : ''} ${dragKey === col.key ? 'opacity-60' : ''}`}>
+                            <button className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                              <MoreVertical className="w-5 h-5" />
+                            </button>
+                          </td>
+                        );
+                      default:
+                        return null;
+                    }
+                  })}
                 </tr>
               ))}
             </tbody>
